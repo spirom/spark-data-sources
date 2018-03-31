@@ -4,13 +4,13 @@
 This project illustrates the new V2 Apache Spark External Data Source API as
 introduced in Spark 2.3.0.
 
-I consists of:
+It consists of:
 * A simplistic in-memory database system (ExampleDB) that supports all of the data access
 paradigms needed to illustrate the features of the API
 * A series of data sources of varying complexity, all implemented in Java since
 native Java support is a major goal of the new API (Scala versions mey be added in the future)
 * A series of Spark examples to exercise the various data sources implemented
-(also in Java for the time being.)
+(also in Java for now)
 
 The project has spun out of the following older projects:
 * [https://github.com/spirom/LearningSpark](https://github.com/spirom/LearningSpark) -- a wide range of Spark examples in Scala
@@ -32,7 +32,7 @@ The project has spun out of the following older projects:
 # Target Audience
 
 This project is targeted at developers who are designing and implementing a new Spark
-external data source for some data store with which they are reasonably familiar, and are
+external data source for some data store with which they are reasonably familiar, and
 need information on Spark's new (V2) model for integrating external data sources.
 
 # Designing ExampleDB
