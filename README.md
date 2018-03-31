@@ -1,5 +1,5 @@
 
-# Spark External Data Sources with the V2 API
+# Spark External Data Sources using the V2 API
 
 This project illustrates the new V2 Apache Spark External Data Source API as
 introduced in Spark 2.3.0.
@@ -29,9 +29,42 @@ The project has spun out of the following older projects:
     * different levels of optimization support
 * Show the different ways to use the data sources from Spark
 
+# Target Audience
+
+This project is targeted at developers who are designing and implementing a new Spark
+external data source for some data store with which they are reasonably familiar, and are
+need information on Spark's new (V2) model for integrating external data sources.
+
 # Designing ExampleDB
 
+This project is rather unusual in the decision to develop, from scratch, a simple
+in-memory database system (ExampleDB) for the sole purpose of providing a simple
+example integration point
+for a wide range of Spark external data source examples. It's important to
+understand the goals and (especially) non-goals of ExampleDB.
 
+## Goals
+
+* All communication with ExampleDB should be via remote procedure calls (RPCs) so it
+is clearly
+separated from the data sources that use it.
+* For simplicity, the example Spark code should have the option of running ExampleDB
+in-process on
+the driver node (to avoid cluttering the examples with process control issues).
+* ExampleDB should provide a suitable data model and set of API entry points to
+support ALL of the features illustrated in the example data sources. Of course, this is
+made a rather tough goal by the remarkable breadth of the new data source API, spanning
+both row and column based data representations as well as batch and streaming queries.
+
+## Non-goals
+
+* The data model and API of ExampleDB don't really have to make sense as a whole --
+it's sufficient if they merely mimic features in the real world with sufficient fidelity
+that developers can see how to map them to the features of the data store they are trying
+to integrate with Spark.
+* The implementation of ExampleDB doesn't have to make sense. Achieving high performance is not
+a goal and as such neither is the use of advanced DBMS implementation techniques. Since
+ExampleDB only has to serve these examples, it is implemented with expediency as its major focus.
 
 # The Data Sources
 
@@ -44,7 +77,7 @@ These can be found under [src/main/java/datasources](src/main/java/datasources).
 <td><a href="src/main/java/datasources/SimpleRowDataSource.java">SimpleRowDataSource.java</a></td>
 <td>
 <p>An extremely simple DataSource that supports sequential reads (i.e.: on just one executor)
-from the ExampleDB. It only supports reads from a single, pre-defined table with a
+from ExampleDB. It only supports reads from a single, pre-defined table with a
 pre-defined schema. This DataSource is probably about a simple as one that reads from a
 remote database can get.</p>
 </td>
@@ -53,8 +86,17 @@ remote database can get.</p>
 <td><a href="src/main/java/datasources/FlexibleRowDataSource.java">FlexibleRowDataSource.java</a></td>
 <td>
 <p>Another simple DataSource that supports sequential reads (i.e.: on just one executor)
-from the ExampleDB. It gets a table name from its configuration and infers a schema from
+from ExampleDB. It gets a table name from its configuration and infers a schema from
 that table.</p>
+</td>
+</tr>
+<tr>
+<td><a href="src/main/java/datasources/ParallelRowDataSource.java">ParallelRowDataSource.java</a></td>
+<td>
+<p>Another simple DataSource that supports parallel reads (i.e.: on multiple executors)
+from ExampleDB. It gets a table name from its configuration and infers a schema from
+that table. If a number of partitions is specified in properties, it is used. Otherwise,
+the table's default partition count (always 4 in ExampleDB) is used.</p>
 </td>
 </tr>
 </table>
@@ -79,8 +121,17 @@ the table name is not specified int he Spark code.</p>
 <tr>
 <td><a href="src/main/java/examples/ReadNamedTable.java">ReadNamedTable.java</a></td>
 <td>
-<p>Instead uses the FlexibleRowDataStore to infer the schema of a specified table
+<p>Instead uses the FlexibleRowDataSource to infer the schema of a specified table
 and query it, again sequentially, again resulting in a Dataset with a single partition.</p>
+</td>
+</tr>
+<tr>
+<td><a href="src/main/java/examples/ReadParallel.java">ReadParallel.java</a></td>
+<td>
+<p>Uses the ParallelRowDataSource to infer the schema of a specified table
+and query it, this time in parallel, resulting in Datasets with multiple partitions.
+The example shows both taking the default number of partitions and
+specifying a partition count.</p>
 </td>
 </tr>
 </table>
