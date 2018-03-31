@@ -1,0 +1,110 @@
+syntax = "proto2";
+
+option java_multiple_files = true;
+option java_package = "edb.rpc";
+option java_outer_classname = "EDBProto";
+
+service ExampleDB {
+    rpc Ping (PingRequest) returns (PingResponse) {}
+    rpc ListTables (ListTablesRequest) returns (ListTablesResponse) {}
+    rpc CreateTable (CreateTableRequest) returns (CreateTableResponse) {}
+    rpc GetTableSchema (GetTableSchemaRequest) returns (GetTableSchemaResponse) {}
+    rpc BulkInsert (BulkInsertRequest) returns (BulkInsertResponse) {}
+    rpc GetAllRows (GetAllRowsRequest) returns (GetAllRowsResponse) {}
+    rpc GetSplits (GetSplitsRequest) returns (GetSplitsResponse) {}
+}
+
+message PingRequest {
+    required string id = 1;
+}
+
+message PingResponse {
+    required string id = 1;
+}
+
+message ListTablesRequest {
+}
+
+message ListTablesResponse {
+    repeated string tableNames = 1;
+}
+
+message CreateTableRequest {
+    required string name = 1;
+    required TableSchema schema = 2;
+}
+
+message CreateTableResponse {
+    required bool result = 1;
+}
+
+message GetTableSchemaRequest {
+    required string name = 1;
+}
+
+message GetTableSchemaResponse {
+    required bool result = 1;
+    optional TableSchema schema = 2;
+}
+
+message BulkInsertRequest {
+    required string name = 1;
+    repeated DataRow row = 2;
+}
+
+message BulkInsertResponse {
+    required bool result = 1;
+}
+
+message GetAllRowsRequest {
+    required string name = 1;
+    optional Split split = 2;
+}
+
+message GetAllRowsResponse {
+    required bool result = 1;
+    repeated DataRow row = 2;
+}
+
+message GetSplitsRequest {
+    required string name = 1;
+    optional int32 count = 2;
+}
+
+message GetSplitsResponse {
+    required bool result = 1;
+    repeated Split splits = 2;
+}
+
+message TableSchema {
+    repeated ColumnSchema column = 1;
+}
+
+enum ColumnType {
+    Int64 = 0;
+    Double = 1;
+}
+
+message ColumnSchema {
+    required string name = 1;
+    required ColumnType type = 2;
+}
+
+message QueryResult {
+    required TableSchema schema = 1;
+    repeated DataRow rows = 2;
+}
+
+message DataRow {
+    repeated group KeyValue = 1 {
+        required string key = 1;
+        // workaround for lack of "oneof" support in protobuf 2.5
+        optional int64 in64val = 2;
+        optional double doubleval = 3;
+    }
+}
+
+message Split {
+    required int64 firstRow = 1;
+    required int64 lastRow = 2;
+}
