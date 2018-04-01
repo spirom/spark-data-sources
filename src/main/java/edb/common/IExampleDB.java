@@ -7,6 +7,9 @@ public interface IExampleDB {
 
     void createTable(String name, Schema schema) throws ExistingTableException;
 
+    void createTable(String name, Schema schema, String clusterColumn)
+            throws ExistingTableException;
+
     Schema getTableSchema(String name) throws UnknownTableException;
 
     void bulkInsert(String name, List<Row> rows) throws UnknownTableException;

@@ -9,8 +9,6 @@ import java.util.List;
 
 public class Database implements IExampleDB {
 
-
-
     public List<String> listTables() {
         return new ArrayList<>(_tables.keySet());
     }
@@ -26,11 +24,23 @@ public class Database implements IExampleDB {
         }
     }
 
+    public void createTable(String name, Schema schema, String clusterColumn)
+            throws ExistingTableException {
+
+        boolean present = _tables.containsKey(name);
+
+        if (present) {
+            throw new ExistingTableException(name);
+        } else {
+            _tables.put(name, new ClusteredIndexTable(name, schema, clusterColumn));
+        }
+    }
+
     public Schema getTableSchema(String name) throws UnknownTableException {
 
         boolean present = _tables.containsKey(name);
         if (present) {
-            SimpleTable entry = _tables.get(name);
+            ITable entry = _tables.get(name);
             return entry.getSchema();
         } else {
             throw new UnknownTableException(name);
@@ -40,7 +50,7 @@ public class Database implements IExampleDB {
     public void bulkInsert(String name, List<Row> rows) throws UnknownTableException {
         boolean present = _tables.containsKey(name);
         if (present) {
-            SimpleTable entry = _tables.get(name);
+            ITable entry = _tables.get(name);
             entry.addRows(rows);
         } else {
             throw new UnknownTableException(name);
@@ -50,7 +60,7 @@ public class Database implements IExampleDB {
     public List<Row> getAllRows(String name) throws UnknownTableException {
         boolean present = _tables.containsKey(name);
         if (present) {
-            SimpleTable entry = _tables.get(name);
+            ITable entry = _tables.get(name);
             return entry.getRows();
         } else {
             throw new UnknownTableException(name);
@@ -60,7 +70,7 @@ public class Database implements IExampleDB {
     public List<Row> getAllRows(String name, Split split) throws UnknownTableException {
         boolean present = _tables.containsKey(name);
         if (present) {
-            SimpleTable entry = _tables.get(name);
+            ITable entry = _tables.get(name);
             return entry.getRows(split);
         } else {
             throw new UnknownTableException(name);
@@ -70,7 +80,7 @@ public class Database implements IExampleDB {
     public List<Split> getSplits(String table) throws UnknownTableException {
         boolean present = _tables.containsKey(table);
         if (present) {
-            SimpleTable entry = _tables.get(table);
+            ITable entry = _tables.get(table);
             return entry.makeSplits();
         } else {
             throw new UnknownTableException(table);
@@ -80,13 +90,13 @@ public class Database implements IExampleDB {
     public List<Split> getSplits(String table, int count) throws UnknownTableException {
         boolean present = _tables.containsKey(table);
         if (present) {
-            SimpleTable entry = _tables.get(table);
+            ITable entry = _tables.get(table);
             return entry.makeSplits(count);
         } else {
             throw new UnknownTableException(table);
         }
     }
 
-    Hashtable<String, SimpleTable> _tables = new Hashtable<>();
+    Hashtable<String, ITable> _tables = new Hashtable<>();
 
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * Splits work on clusters instead of rows, which may create skew. (That is, splits tend to
  * keep the number of clusters even, not the number of rows.)
  */
-class ClusteredIndexTable {
+class ClusteredIndexTable implements ITable {
     public ClusteredIndexTable(String name, Schema schema, String indexColumn) {
         if (schema.getColumnType(indexColumn) != Schema.ColumnType.STRING) {
             throw new IllegalArgumentException("Index column [" + indexColumn +
@@ -31,11 +31,12 @@ class ClusteredIndexTable {
         for (Row row : rows) {
             try {
                 String indexVal = row.getField(_indexColumn).getStringValue();
-                if (_rows.containsKey(_indexColumn)) {
-                    _rows.get(_indexColumn).add(row);
+                if (_rows.containsKey(indexVal)) {
+                    _rows.get(indexVal).add(row);
                 } else {
-                    List<Row> newList = Collections.singletonList(row);
-                    _rows.put(_indexColumn, newList);
+                    List<Row> newList = new ArrayList<>();
+                    newList.add(row);
+                    _rows.put(indexVal, newList);
                     _orderedClusters.add(newList);
                 }
             } catch (InvalidTypeException ite) {

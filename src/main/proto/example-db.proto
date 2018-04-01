@@ -32,6 +32,7 @@ message ListTablesResponse {
 message CreateTableRequest {
     required string name = 1;
     required TableSchema schema = 2;
+    optional string clusterColumn = 3;
 }
 
 message CreateTableResponse {

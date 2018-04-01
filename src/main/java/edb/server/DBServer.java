@@ -86,7 +86,11 @@ public class DBServer {
 
             CreateTableResponse.Builder builder = CreateTableResponse.newBuilder();
             try {
-                _db.createTable(name, new Schema(schema));
+                if (req.hasClusterColumn()) {
+                    _db.createTable(name, new Schema(schema), req.getClusterColumn());
+                } else {
+                    _db.createTable(name, new Schema(schema));
+                }
                 builder.setResult(true);
             } catch (ExistingTableException ete) {
                 builder.setResult(false);

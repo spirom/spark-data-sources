@@ -42,6 +42,9 @@ public class Schema {
                 case Double:
                     addColumn(rpcColumn.getName(), Schema.ColumnType.DOUBLE);
                     break;
+                case String:
+                    addColumn(rpcColumn.getName(), Schema.ColumnType.STRING);
+                    break;
             }
         }
     }
@@ -63,6 +66,9 @@ public class Schema {
                     break;
                 case DOUBLE:
                     colBuilder.setType(edb.rpc.ColumnType.Double);
+                    break;
+                case STRING:
+                    colBuilder.setType(edb.rpc.ColumnType.String);
                     break;
                 default:
             }

@@ -8,7 +8,7 @@ import edb.common.Split;
 import java.util.ArrayList;
 import java.util.List;
 
-class SimpleTable {
+class SimpleTable implements ITable {
     public SimpleTable(String name, Schema schema) {
         _name = name;
         _schema = schema;

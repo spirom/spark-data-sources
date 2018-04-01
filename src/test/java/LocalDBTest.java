@@ -309,4 +309,66 @@ public class LocalDBTest {
 
     }
 
+    @Test
+    public void testClusteredSplits()
+            throws Exception {
+
+        SampleTables.makeClustered(_db, "table1", 16, 8);
+
+        List<Split> splits = _db.getSplits("table1", 4);
+
+        assertThat(splits).isNotNull();
+
+        assertThat(splits.size()).isEqualTo(4);
+
+        IndexSplit indexSplit = (IndexSplit)splits.get(0);
+        assertThat(indexSplit.firstRow()).isEqualTo(0);
+        assertThat(indexSplit.lastRow()).isEqualTo(2);
+
+        List<Row> returned = _db.getAllRows("table1", splits.get(0));
+        assertThat(returned).isNotNull();
+        assertThat(returned.size()).isEqualTo(4);
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(0);
+        assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(8);
+        assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(1);
+        assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(9);
+
+        indexSplit = (IndexSplit)splits.get(1);
+        assertThat(indexSplit.firstRow()).isEqualTo(2);
+        assertThat(indexSplit.lastRow()).isEqualTo(4);
+
+        returned = _db.getAllRows("table1", splits.get(1));
+        assertThat(returned).isNotNull();
+        assertThat(returned.size()).isEqualTo(4);
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(2);
+        assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(10);
+        assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(3);
+        assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(11);
+
+        indexSplit = (IndexSplit)splits.get(2);
+        assertThat(indexSplit.firstRow()).isEqualTo(4);
+        assertThat(indexSplit.lastRow()).isEqualTo(6);
+
+        returned = _db.getAllRows("table1", splits.get(2));
+        assertThat(returned).isNotNull();
+        assertThat(returned.size()).isEqualTo(4);
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(4);
+        assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(12);
+        assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(5);
+        assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(13);
+
+        indexSplit = (IndexSplit)splits.get(3);
+        assertThat(indexSplit.firstRow()).isEqualTo(6);
+        assertThat(indexSplit.lastRow()).isEqualTo(8);
+
+        returned = _db.getAllRows("table1", splits.get(3));
+        assertThat(returned).isNotNull();
+        assertThat(returned.size()).isEqualTo(4);
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(6);
+        assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(14);
+        assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(7);
+        assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(15);
+
+    }
+
 }

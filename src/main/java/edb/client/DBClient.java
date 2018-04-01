@@ -82,6 +82,29 @@ public class DBClient implements IExampleDB {
         }
     }
 
+    public void createTable(String name, Schema schema, String clusterColumn)
+            throws ExistingTableException {
+        CreateTableRequest.Builder builder = CreateTableRequest.newBuilder();
+        builder.setName(name);
+        TableSchema.Builder schemaBuilder = TableSchema.newBuilder();
+        schema.build(schemaBuilder);
+        builder.setSchema(schemaBuilder.build());
+        builder.setClusterColumn(clusterColumn);
+
+        CreateTableRequest request = builder.build();
+        CreateTableResponse response;
+        try {
+            response = _blockingStub.createTable(request);
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        if (!response.getResult()) {
+            throw new ExistingTableException(name);
+        }
+    }
+
     public Schema getTableSchema(String name) throws UnknownTableException {
         GetTableSchemaRequest.Builder builder = GetTableSchemaRequest.newBuilder();
         builder.setName(name);
