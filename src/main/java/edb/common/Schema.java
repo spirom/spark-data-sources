@@ -11,7 +11,8 @@ public class Schema {
 
     public enum ColumnType {
         INT64,
-        DOUBLE
+        DOUBLE,
+        STRING
     }
 
     public static class SchemaEntry {
@@ -76,6 +77,7 @@ public class Schema {
 
     public ColumnType getColumnType(int i) { return _orderedColumns.get(i).getType(); }
 
+    public ColumnType getColumnType(String name) { return _columns.get(name).getType(); }
 
     private Hashtable<String, SchemaEntry> _columns = new Hashtable<>();
 

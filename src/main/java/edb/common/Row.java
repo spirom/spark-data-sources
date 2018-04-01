@@ -23,6 +23,10 @@ public class Row {
             throw new InvalidTypeException(_name);
         }
 
+        public String getStringValue() throws InvalidTypeException {
+            throw new InvalidTypeException(_name);
+        }
+
         private String _name;
     }
 
@@ -58,6 +62,22 @@ public class Row {
         private double _value;
     }
 
+    public static class StringField extends Field {
+        public StringField(String name, String value) {
+            super(name);
+            _value = value;
+        }
+
+        @Override
+        public String getStringValue() throws InvalidTypeException {
+            return _value;
+        }
+
+        public String getValue() { return _value; }
+
+        private String _value;
+    }
+
     public Row() {}
 
     public Row(DataRow rpcRow) {
@@ -66,6 +86,8 @@ public class Row {
                 addField(new DoubleField(kv.getKey(), kv.getDoubleval()));
             } else if (kv.hasIn64Val()) {
                 addField(new Int64Field(kv.getKey(), kv.getIn64Val()));
+            } else if (kv.hasStringval()) {
+                addField(new StringField(kv.getKey(), kv.getStringval()));
             }
         }
     }
@@ -81,6 +103,9 @@ public class Row {
             } else if (f instanceof Int64Field) {
                 Int64Field i64f = (Int64Field) f;
                 kvBuilder.setIn64Val(i64f.getValue());
+            } else if (f instanceof StringField) {
+                StringField sf = (StringField) f;
+                kvBuilder.setStringval(sf.getValue());
             }
             convertedColumns.add(kvBuilder.build());
         }

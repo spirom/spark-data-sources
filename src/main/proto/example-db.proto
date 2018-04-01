@@ -83,6 +83,7 @@ message TableSchema {
 enum ColumnType {
     Int64 = 0;
     Double = 1;
+    String = 2;
 }
 
 message ColumnSchema {
@@ -101,10 +102,10 @@ message DataRow {
         // workaround for lack of "oneof" support in protobuf 2.5
         optional int64 in64val = 2;
         optional double doubleval = 3;
+        optional string stringval = 4;
     }
 }
 
 message Split {
-    required int64 firstRow = 1;
-    required int64 lastRow = 2;
+    required bytes opaque = 1;
 }

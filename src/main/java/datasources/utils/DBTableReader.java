@@ -51,6 +51,9 @@ public class DBTableReader {
             } else if (f instanceof edb.common.Row.DoubleField) {
                 edb.common.Row.DoubleField df = (edb.common.Row.DoubleField) f;
                 values[i] = df.getValue();
+            } else if (f instanceof edb.common.Row.StringField) {
+                edb.common.Row.StringField df = (edb.common.Row.StringField) f;
+                values[i] = df.getValue();
             }
         }
         GenericRow row = new GenericRow(values);
@@ -67,6 +70,9 @@ public class DBTableReader {
                 values[i] = i64f.getValue();
             } else if (f instanceof edb.common.Row.DoubleField) {
                 edb.common.Row.DoubleField df = (edb.common.Row.DoubleField) f;
+                values[i] = df.getValue();
+            } else if (f instanceof edb.common.Row.StringField) {
+                edb.common.Row.StringField df = (edb.common.Row.StringField) f;
                 values[i] = df.getValue();
             }
         }

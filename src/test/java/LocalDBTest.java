@@ -27,6 +27,17 @@ public class LocalDBTest {
     }
 
     @Test
+    public void testSplitSerDe() {
+        SimpleSplit simpleSplit = new SimpleSplit(5, 10);
+        byte[] bytes = simpleSplit.serialize();
+        Split otherSplit = Split.deserialize(bytes);
+        assertThat(otherSplit).isInstanceOf(SimpleSplit.class);
+        SimpleSplit otherSimpleSplit = (SimpleSplit) otherSplit;
+        assertThat(otherSimpleSplit.firstRow()).isEqualTo(5);
+        assertThat(otherSimpleSplit.lastRow()).isEqualTo(10);
+    }
+
+    @Test
     public void testListNoTables() throws IOException {
         List<String> names = _db.listTables();
         assertThat(names).isNotNull();
@@ -129,24 +140,28 @@ public class LocalDBTest {
 
         assertThat(splits.size()).isEqualTo(5);
 
-        assertThat(splits.get(0).firstRow()).isEqualTo(0);
-        assertThat(splits.get(0).lastRow()).isEqualTo(1);
+        SimpleSplit simpleSplit = (SimpleSplit)splits.get(0);
+        assertThat(simpleSplit.firstRow()).isEqualTo(0);
+        assertThat(simpleSplit.lastRow()).isEqualTo(1);
 
         List<Row> returned = _db.getAllRows("table1", splits.get(0));
         assertThat(returned).isNotNull();
         assertThat(returned.size()).isEqualTo(1);
         assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(0);
 
-        assertThat(splits.get(1).firstRow()).isEqualTo(1);
-        assertThat(splits.get(1).lastRow()).isEqualTo(2);
+        simpleSplit = (SimpleSplit)splits.get(1);
+        assertThat(simpleSplit.firstRow()).isEqualTo(1);
+        assertThat(simpleSplit.lastRow()).isEqualTo(2);
 
         returned = _db.getAllRows("table1", splits.get(1));
         assertThat(returned).isNotNull();
         assertThat(returned.size()).isEqualTo(1);
         assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(1);
 
-        assertThat(splits.get(2).firstRow()).isEqualTo(2);
-        assertThat(splits.get(2).lastRow()).isEqualTo(3);
+        simpleSplit = (SimpleSplit)splits.get(2);
+        assertThat(simpleSplit.firstRow()).isEqualTo(2);
+        assertThat(simpleSplit.lastRow()).isEqualTo(3);
+        assertThat(simpleSplit.lastRow()).isEqualTo(3);
 
         returned = _db.getAllRows("table1", splits.get(2));
         assertThat(returned).isNotNull();
@@ -177,8 +192,9 @@ public class LocalDBTest {
 
         assertThat(splits.size()).isEqualTo(3);
 
-        assertThat(splits.get(0).firstRow()).isEqualTo(0);
-        assertThat(splits.get(0).lastRow()).isEqualTo(3);
+        SimpleSplit simpleSplit = (SimpleSplit)splits.get(0);
+        assertThat(simpleSplit.firstRow()).isEqualTo(0);
+        assertThat(simpleSplit.lastRow()).isEqualTo(3);
 
         List<Row> returned = _db.getAllRows("table1", splits.get(0));
         assertThat(returned).isNotNull();
@@ -187,8 +203,9 @@ public class LocalDBTest {
         assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(1);
         assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(2);
 
-        assertThat(splits.get(1).firstRow()).isEqualTo(3);
-        assertThat(splits.get(1).lastRow()).isEqualTo(6);
+        simpleSplit = (SimpleSplit)splits.get(1);
+        assertThat(simpleSplit.firstRow()).isEqualTo(3);
+        assertThat(simpleSplit.lastRow()).isEqualTo(6);
 
         returned = _db.getAllRows("table1", splits.get(1));
         assertThat(returned).isNotNull();
@@ -197,8 +214,9 @@ public class LocalDBTest {
         assertThat(returned.get(1).getField("a").getInt64Value()).isEqualTo(4);
         assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(5);
 
-        assertThat(splits.get(2).firstRow()).isEqualTo(6);
-        assertThat(splits.get(2).lastRow()).isEqualTo(9);
+        simpleSplit = (SimpleSplit)splits.get(2);
+        assertThat(simpleSplit.firstRow()).isEqualTo(6);
+        assertThat(simpleSplit.lastRow()).isEqualTo(9);
 
         returned = _db.getAllRows("table1", splits.get(2));
         assertThat(returned).isNotNull();
@@ -220,8 +238,9 @@ public class LocalDBTest {
 
         assertThat(splits.size()).isEqualTo(3);
 
-        assertThat(splits.get(0).firstRow()).isEqualTo(0);
-        assertThat(splits.get(0).lastRow()).isEqualTo(4);
+        SimpleSplit simpleSplit = (SimpleSplit)splits.get(0);
+        assertThat(simpleSplit.firstRow()).isEqualTo(0);
+        assertThat(simpleSplit.lastRow()).isEqualTo(4);
 
         List<Row> returned = _db.getAllRows("table1", splits.get(0));
         assertThat(returned).isNotNull();
@@ -231,8 +250,9 @@ public class LocalDBTest {
         assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(2);
         assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(3);
 
-        assertThat(splits.get(1).firstRow()).isEqualTo(4);
-        assertThat(splits.get(1).lastRow()).isEqualTo(8);
+        simpleSplit = (SimpleSplit)splits.get(1);
+        assertThat(simpleSplit.firstRow()).isEqualTo(4);
+        assertThat(simpleSplit.lastRow()).isEqualTo(8);
 
         returned = _db.getAllRows("table1", splits.get(1));
         assertThat(returned).isNotNull();
@@ -242,8 +262,9 @@ public class LocalDBTest {
         assertThat(returned.get(2).getField("a").getInt64Value()).isEqualTo(6);
         assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(7);
 
-        assertThat(splits.get(2).firstRow()).isEqualTo(8);
-        assertThat(splits.get(2).lastRow()).isEqualTo(10);
+        simpleSplit = (SimpleSplit)splits.get(2);
+        assertThat(simpleSplit.firstRow()).isEqualTo(8);
+        assertThat(simpleSplit.lastRow()).isEqualTo(10);
 
         returned = _db.getAllRows("table1", splits.get(2));
         assertThat(returned).isNotNull();
@@ -264,20 +285,25 @@ public class LocalDBTest {
 
         assertThat(splits.size()).isEqualTo(6);
 
-        assertThat(splits.get(0).firstRow()).isEqualTo(0);
-        assertThat(splits.get(0).lastRow()).isEqualTo(4);
+        SimpleSplit simpleSplit = (SimpleSplit)splits.get(0);
+        assertThat(simpleSplit.firstRow()).isEqualTo(0);
+        assertThat(simpleSplit.lastRow()).isEqualTo(4);
 
-        assertThat(splits.get(1).firstRow()).isEqualTo(4);
-        assertThat(splits.get(1).lastRow()).isEqualTo(8);
+        simpleSplit = (SimpleSplit)splits.get(1);
+        assertThat(simpleSplit.firstRow()).isEqualTo(4);
+        assertThat(simpleSplit.lastRow()).isEqualTo(8);
 
-        assertThat(splits.get(2).firstRow()).isEqualTo(8);
-        assertThat(splits.get(2).lastRow()).isEqualTo(12);
+        simpleSplit = (SimpleSplit)splits.get(2);
+        assertThat(simpleSplit.firstRow()).isEqualTo(8);
+        assertThat(simpleSplit.lastRow()).isEqualTo(12);
 
-        assertThat(splits.get(3).firstRow()).isEqualTo(12);
-        assertThat(splits.get(3).lastRow()).isEqualTo(16);
+        simpleSplit = (SimpleSplit)splits.get(3);
+        assertThat(simpleSplit.firstRow()).isEqualTo(12);
+        assertThat(simpleSplit.lastRow()).isEqualTo(16);
 
-        assertThat(splits.get(4).firstRow()).isEqualTo(16);
-        assertThat(splits.get(4).lastRow()).isEqualTo(20);
+        simpleSplit = (SimpleSplit)splits.get(4);
+        assertThat(simpleSplit.firstRow()).isEqualTo(16);
+        assertThat(simpleSplit.lastRow()).isEqualTo(20);
 
         assertThat(splits.get(5).isEmpty()).isTrue();
 

@@ -1,5 +1,7 @@
 package edb.client;
 
+import com.carrotsearch.hppc.ByteScatterSet;
+import com.google.protobuf.ByteString;
 import edb.common.*;
 import edb.common.Split;
 import edb.rpc.*;
@@ -138,8 +140,7 @@ public class DBClient implements IExampleDB {
 
         if (split != null) {
             edb.rpc.Split.Builder splitBuilder = edb.rpc.Split.newBuilder();
-            splitBuilder.setFirstRow(split.firstRow());
-            splitBuilder.setLastRow(split.lastRow());
+            splitBuilder.setOpaque(ByteString.copyFrom(split.serialize()));
             builder.setSplit(splitBuilder.build());
         }
 
@@ -189,7 +190,8 @@ public class DBClient implements IExampleDB {
             List<Split> splits = new ArrayList<>();
             List<edb.rpc.Split> rpcSplits = response.getSplitsList();
             for (edb.rpc.Split rpcSplit : rpcSplits) {
-                Split split = new Split(rpcSplit.getFirstRow(), rpcSplit.getLastRow());
+                byte[] splitBytes = rpcSplit.getOpaque().toByteArray();
+                Split split = Split.deserialize(splitBytes);
                 splits.add(split);
             }
             return splits;

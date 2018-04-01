@@ -1,27 +1,60 @@
 package edb.common;
 
-import java.io.Serializable;
+import java.io.*;
+
+enum SplitKind {
+    SIMPLE, INDEX
+};
 
 /**
- * Denotes a subset of table rows via a pair of zero-based first and last rows.
+ * Denotes a (possibly empty) subset of table rows.
  */
-public class Split implements Serializable {
+public interface Split {
+
     /**
-     * If the two are equal, this split is empty
-     * @param firstRow (inclusive)
-     * @param lastRow (exclusive)
+     * If true, there are no rows int his split. If false, there may or may not be rows.
+     * @return
      */
-    public Split(long firstRow, long lastRow) {
-        _firstRow = firstRow;
-        _lastRow = lastRow;
+    boolean isEmpty();
+
+    static Split deserialize(byte[] splitBytes) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(splitBytes);
+        ObjectInput in = null;
+        try {
+            in = new ObjectInputStream(bis);
+            SplitKind k = (SplitKind) in.readObject();
+            switch (k) {
+                case SIMPLE: {
+                    Object first = in.readObject();
+                    Object last = in.readObject();
+                    return new SimpleSplit(
+                            ((Long)first).longValue(),
+                            ((Long)last).longValue());
+                }
+                case INDEX: {
+                    Object first = in.readObject();
+                    Object last = in.readObject();
+                    return new IndexSplit(
+                            ((Long)first).longValue(),
+                            ((Long)last).longValue());
+                }
+                default:
+                    return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                // ignore close exception
+            }
+        }
+        return null;
     }
 
-    public boolean isEmpty() { return _lastRow <= _firstRow; }
+    byte[] serialize();
 
-    public long firstRow() { return _firstRow; }
-
-    public long lastRow() { return _lastRow; }
-
-    private long _firstRow;
-    private long _lastRow;
 }

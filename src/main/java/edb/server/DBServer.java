@@ -1,5 +1,6 @@
 package edb.server;
 
+import com.google.protobuf.ByteString;
 import edb.common.*;
 import edb.rpc.*;
 
@@ -154,7 +155,7 @@ public class DBServer {
                 if (req.hasSplit()) {
                     Split rpcSplit = req.getSplit();
                     edb.common.Split split =
-                            new edb.common.Split(rpcSplit.getFirstRow(), rpcSplit.getLastRow());
+                            edb.common.Split.deserialize(rpcSplit.getOpaque().toByteArray());
                     rows = _db.getAllRows(name, split);
                 } else {
                     rows = _db.getAllRows(name);
@@ -192,8 +193,8 @@ public class DBServer {
                 List<Split> rpcSplits = new ArrayList<>();
                 for (edb.common.Split split : splits) {
                     edb.rpc.Split.Builder splitBuilder = edb.rpc.Split.newBuilder();
-                    splitBuilder.setFirstRow(split.firstRow());
-                    splitBuilder.setLastRow(split.lastRow());
+                    byte[] splitBytes = split.serialize();
+                    splitBuilder.setOpaque(ByteString.copyFrom(splitBytes));
                     rpcSplits.add(splitBuilder.build());
                 }
                 builder.addAllSplits(rpcSplits);
