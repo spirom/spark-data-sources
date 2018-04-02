@@ -24,8 +24,18 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Another simple DataSource that supports parallel reads (i.e.: on multiple executors)
- * from the ExampleDB. It gets a table name from its configuration and infers a schema from
+ * This DataSource also supports parallel reads (i.e.: on multiple executors)
+ * from the ExampleDB.
+ *
+ * The interesting feature of this example is that it supports informing the
+ * Spark SQL optimizer whether the table is partitioned in the right way to avoid shuffles
+ * in certain queries. One example is grouping queries, where shuffles can be avoided if the
+ * table is clustered in such a way that each group (cluster) is fully contained in a
+ * single partition. Since ExampleDB only supports clustered indexes on single columns,
+ * in practice a shuffle can be avoided if the table is clustered on one of the grouping
+ * columns. (In ExampleDB clustered tables, splits always respect clustering.)
+ *
+ * It gets a table name from its configuration and infers a schema from
  * that table. If a number of partitions is specified in properties, it is used. Otherwise,
  * the table's default partition count (always 4 in ExampleDB) is used.
  */
@@ -53,7 +63,7 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
      * and how it obtains the reader factories to be used by the executors to create readers.
      * Notice that one factory is created for each partition.
      */
-    static class Reader implements DataSourceReader, SupportsReportPartitioning {
+    static class Reader implements SupportsReportPartitioning {
 
         static Logger log = Logger.getLogger(Reader.class.getName());
 

@@ -99,6 +99,21 @@ that table. If a number of partitions is specified in properties, it is used. Ot
 the table's default partition count (always 4 in ExampleDB) is used.</p>
 </td>
 </tr>
+<tr>
+<td><a href="src/main/java/datasources/PartitioningRowDataSource.java">PartitioningRowDataSource.java</a></td>
+<td>
+<p>This also supports parallel reads (i.e.: on multiple executors)
+from the ExampleDB.
+The interesting feature of this example is that it supports informing the
+Spark SQL optimizer whether the table is partitioned in the right way to avoid shuffles
+in certain queries. One example is grouping queries, where shuffles can be avoided if the
+table is clustered in such a way that each group (cluster) is fully contained in a
+single partition. Since ExampleDB only supports clustered indexes on single columns,
+in practice a shuffle can be avoided if the table is clustered on one of the grouping
+(In ExampleDB clustered tables, splits always respect clustering.)
+</p>
+</td>
+</tr>
 </table>
 
 # The Spark Examples
@@ -132,6 +147,21 @@ and query it, again sequentially, again resulting in a Dataset with a single par
 and query it, this time in parallel, resulting in Datasets with multiple partitions.
 The example shows both taking the default number of partitions and
 specifying a partition count.</p>
+</td>
+</tr>
+<tr>
+<td><a href="src/main/java/examples/ReadPartitionAware.java">ReadPartitionAware.java</a></td>
+<td>
+<p>Uses the PartitioningRowDataSource to avoid a shuffle in a grouping/aggregation query
+against a table that is clustered ont he grouping column. It achieves this by using the
+SupportsReportPartitioning mixin for the DataSourceReader interface.</p>
+</td>
+</tr>
+<tr>
+<td><a href="src/main/java/examples/ReadPartitionAware_Mismatch.java">ReadPartitionAware_Mismatch.java</a></td>
+<td>
+<p>This uses the same data source as the previous example but doesn't cluster the table, thus
+illustrating the shuffle that takes place. .</p>
 </td>
 </tr>
 </table>
