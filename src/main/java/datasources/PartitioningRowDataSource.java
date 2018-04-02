@@ -53,54 +53,67 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
      * and how it obtains the reader factories to be used by the executors to create readers.
      * Notice that one factory is created for each partition.
      */
-    class Reader implements DataSourceReader, SupportsReportPartitioning {
+    static class Reader implements DataSourceReader, SupportsReportPartitioning {
+
+        static Logger log = Logger.getLogger(Reader.class.getName());
 
         public Reader(String host, int port, String table, int partitions) {
             _host = host;
             _port = port;
             _table = table;
-            _partitions = partitions;
+            _requestedPartitions = partitions;
         }
 
-        private StructType _schema;
         private String _host;
         private int _port;
         private String _table;
-        private int _partitions;
+        private int _requestedPartitions;
 
-        @Override
-        public StructType readSchema() {
-            if (_schema == null) {
+        //
+        // dynamic properties inferred from database
+        //
+
+        private boolean _initialized = false;
+        private StructType _schema;
+        private String _clusteredColumn;
+        private List<Split> _splits;
+
+
+        private void initialize() {
+            if (!_initialized) {
+                log.info("initializing");
                 DBClientWrapper db = new DBClientWrapper(_host, _port);
                 db.connect();
                 try {
                     _schema = db.getSchema(_table);
+                    _clusteredColumn = db.getClusteredIndexColumn(_table);
+                    if (_requestedPartitions == 0)
+                        _splits = db.getSplits(_table);
+                    else
+                        _splits = db.getSplits(_table, _requestedPartitions);
                 } catch (UnknownTableException ute) {
                     throw new RuntimeException(ute);
                 } finally {
                     db.disconnect();
                 }
+                _initialized = true;
+                log.info("initialized");
             }
+        }
+
+        @Override
+        public StructType readSchema() {
+            log.info("schema requested for table [" + _table + "]");
+            initialize();
             return _schema;
         }
 
         @Override
         public List<DataReaderFactory<Row>> createDataReaderFactories() {
-            List<Split> splits = null;
-            DBClientWrapper db = new DBClientWrapper(_host, _port);
-            db.connect();
-            try {
-                if (_partitions == 0)
-                    splits = db.getSplits(_table);
-                else
-                    splits = db.getSplits(_table, _partitions);
-            } catch (UnknownTableException ute) {
-                throw new RuntimeException(ute);
-            } finally {
-                db.disconnect();
-            }
+            log.info("reader factories requested for table [" + _table + "]");
+            initialize();
             List<DataReaderFactory<Row>> factories = new ArrayList<>();
-            for (Split split : splits) {
+            for (Split split : _splits) {
                 DataReaderFactory<Row> factory =
                         new SplitDataReaderFactory(_host, _port, _table, readSchema(), split);
                 factories.add(factory);
@@ -110,29 +123,15 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
 
         @Override
         public Partitioning outputPartitioning() {
-            return new TrivialPartitioning();
-        }
-    }
-
-    static class TrivialPartitioning implements Partitioning {
-
-        static Logger log = Logger.getLogger(TrivialPartitioning.class.getName());
-
-        @Override
-        public int numPartitions() {
-            log.info("asked for numPartitions");
-            return 8;
-        }
-
-        @Override
-        public boolean satisfy(Distribution distribution) {
-            log.info("asked to satisfy");
-            // can't satisfy any Distribution
-            return false;
+            log.info("output partitioning requested for table [" + _table + "]");
+            return new SingleClusteredColumnPartitioning(
+                    _clusteredColumn, _splits.size());
         }
     }
 
     static class SingleClusteredColumnPartitioning implements Partitioning {
+
+        static Logger log = Logger.getLogger(SingleClusteredColumnPartitioning.class.getName());
 
         public SingleClusteredColumnPartitioning(String columnName, int partitions) {
             _columnName = columnName;
@@ -141,6 +140,7 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
 
         @Override
         public int numPartitions() {
+            log.info("asked for numPartitions");
             return _partitions;
         }
 
@@ -150,11 +150,31 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
             // Since Spark may add other Distribution policies in the future, we can't assume
             // it's always a ClusteredDistribution
             //
-            if (distribution instanceof ClusteredDistribution) {
-                String[] clusteredCols = ((ClusteredDistribution) distribution).clusteredColumns;
-                return Arrays.asList(clusteredCols).contains(_columnName);
-            }
 
+            if (distribution instanceof ClusteredDistribution) {
+
+                String[] clusteredCols = ((ClusteredDistribution) distribution).clusteredColumns;
+                StringBuilder logEntryBuilder = new StringBuilder();
+                logEntryBuilder.append("asked to satisfy ClusteredDistribution on columns ");
+                if (clusteredCols.length > 0) {
+                    for (String col : clusteredCols) {
+                        logEntryBuilder.append("[");
+                        logEntryBuilder.append(col);
+                        logEntryBuilder.append("] ");
+                    }
+                }
+                log.info(logEntryBuilder.toString());
+                if (_columnName == null) {
+                    log.info("no cluster column so does not satisfy");
+                    return false;
+                } else {
+                    boolean satisfies = Arrays.asList(clusteredCols).contains(_columnName);
+                    log.info("based on cluster column: " + satisfies);
+                    return satisfies;
+                }
+            }
+            log.info("asked to satisfy unknown distribution of type [" +
+                    distribution.getClass().getCanonicalName() + "]");
             return false;
         }
 
@@ -206,6 +226,8 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
      * which uses it to create a reader for its own use.
      */
     static class SplitDataReaderFactory implements DataReaderFactory<Row> {
+
+        static Logger log = Logger.getLogger(SplitDataReaderFactory.class.getName());
 
         public SplitDataReaderFactory(String host, int port,
                                        String table, StructType schema,

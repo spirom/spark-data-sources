@@ -46,7 +46,9 @@ public class FlexibleRowDataSource implements DataSourceV2, ReadSupport {
      * resulting Dataset will have only a single partition -- that's why this DataSource
      * only provides sequential reads.
      */
-    class Reader implements DataSourceReader {
+    static class Reader implements DataSourceReader {
+
+        static Logger log = Logger.getLogger(Reader.class.getName());
 
         public Reader(String host, int port, String table) {
             _host = host;
@@ -77,6 +79,7 @@ public class FlexibleRowDataSource implements DataSourceV2, ReadSupport {
 
         @Override
         public List<DataReaderFactory<Row>> createDataReaderFactories() {
+            log.info("creating a single factory");
             return java.util.Collections.singletonList(
                     new SimpleDataReaderFactory(_host, _port, _table, readSchema()));
         }
@@ -126,6 +129,8 @@ public class FlexibleRowDataSource implements DataSourceV2, ReadSupport {
      * which uses it to create a reader for its own use.
      */
     static class SimpleDataReaderFactory implements DataReaderFactory<Row> {
+
+        static Logger log = Logger.getLogger(SimpleDataReaderFactory.class.getName());
 
         public SimpleDataReaderFactory(String host, int port,
                                        String table, StructType schema) {

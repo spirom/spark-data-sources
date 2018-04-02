@@ -35,23 +35,29 @@ public class ReadPartitionAware {
 
         //
         // Since this DataSource doesn't support writing, we need to populate
-        // ExampleDB with some data. Also, since the DataSource only uses a
-        // fixed schema and reads from a single, fixed table, we need to make
-        // sure that the data we create conforms to those.
+        // ExampleDB with some data.
         //
 
         Schema schema = new Schema();
+        schema.addColumn("g", Schema.ColumnType.STRING);
         schema.addColumn("u", Schema.ColumnType.INT64);
-        schema.addColumn("v", Schema.ColumnType.DOUBLE);
+
 
         DBClient client = new DBClient(serverHost, serverPort);
-        client.createTable("myTable", schema);
+        //
+        // Specify that the table is partitioned on column G
+        //
+        client.createTable("myTable", schema, "g");
 
         List<edb.common.Row> toInsert = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             edb.common.Row r = new edb.common.Row();
+            //
+            // String column with four distinct values for clustering
+            //
+            r.addField(new edb.common.Row.StringField("g", "G_" + (i % 4)));
             r.addField(new edb.common.Row.Int64Field("u", i * 100));
-            r.addField(new edb.common.Row.DoubleField("v", i + 0.2));
+
             toInsert.add(r);
         }
 
@@ -66,20 +72,22 @@ public class ReadPartitionAware {
 
         SparkSession spark = SparkSession
                 .builder()
-                .appName("ReadParallel")
+                .appName("ReadPartitionAware")
                 .master("local[4]")
                 .getOrCreate();
 
         //
         // This is where we read from our DataSource. Notice how we use the
         // fully qualified class name and provide the information needed to connect to
-        // ExampleDB using options.
+        // ExampleDB using options. We specify two partitions so that each can be expected
+        // to contain two clusters.
         //
         Dataset<Row> data = spark.read()
                 .format(dataSourceName)
                 .option("host", serverHost)
                 .option("port", serverPort)
                 .option("table", "myTable")
+                .option("partitions", 2) // number of partitions specified here
                 .load();
 
         System.out.println("*** Schema: ");
@@ -88,39 +96,14 @@ public class ReadPartitionAware {
         System.out.println("*** Data: ");
         data.show();
 
-        //
-        // Since this DataSource supports reading from one executor,
-        // there will be a multiple partitions.
-        //
         RDDUtils.analyze(data);
 
+        Dataset<Row> aggregated = data.groupBy(col("g")).agg(sum(col("u")));
 
-        //
-        // We can specify a different number of partitions too
-        //
-        data = spark.read()
-                .format(dataSourceName)
-                .option("host", serverHost)
-                .option("port", serverPort)
-                .option("table", "myTable")
-                .option("partitions", 6) // number of partitions specified here
-                .load();
-
-        System.out.println("*** Schema: ");
-        data.printSchema();
-
-        System.out.println("*** Data: ");
-        data.show();
-
-        //
-        // This time we see six partitions.
-        //
-        RDDUtils.analyze(data);
-
-        Dataset<Row> aggregated = data.groupBy(col("u")).agg(sum(col("v")));
-
+        System.out.println("*** Query result: ");
         aggregated.show();
 
+        RDDUtils.analyze(aggregated);
 
         spark.stop();
 

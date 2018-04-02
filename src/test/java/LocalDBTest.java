@@ -279,6 +279,9 @@ public class LocalDBTest {
 
         SampleTables.makeSimple(_db, "table1", 20);
 
+        String clusteredIndexColumn = _db.getTableClusteredIndexColumn("table1");
+        assertThat(clusteredIndexColumn).isNull();
+
         List<Split> splits = _db.getSplits("table1", 6);
 
         assertThat(splits).isNotNull();
@@ -314,6 +317,10 @@ public class LocalDBTest {
             throws Exception {
 
         SampleTables.makeClustered(_db, "table1", 16, 8);
+
+        String clusteredIndexColumn = _db.getTableClusteredIndexColumn("table1");
+        assertThat(clusteredIndexColumn).isNotNull();
+        assertThat(clusteredIndexColumn).isEqualTo("c");
 
         List<Split> splits = _db.getSplits("table1", 4);
 

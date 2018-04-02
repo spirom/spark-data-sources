@@ -12,6 +12,8 @@ public interface IExampleDB {
 
     Schema getTableSchema(String name) throws UnknownTableException;
 
+    String getTableClusteredIndexColumn(String name) throws UnknownTableException;
+
     void bulkInsert(String name, List<Row> rows) throws UnknownTableException;
 
     List<Row> getAllRows(String name) throws UnknownTableException;

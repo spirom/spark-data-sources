@@ -48,7 +48,9 @@ public class ParallelRowDataSource implements DataSourceV2, ReadSupport {
      * and how it obtains the reader factories to be used by the executors to create readers.
      * Notice that one factory is created for each partition.
      */
-    class Reader implements DataSourceReader {
+    static class Reader implements DataSourceReader {
+
+        static Logger log = Logger.getLogger(Reader.class.getName());
 
         public Reader(String host, int port, String table, int partitions) {
             _host = host;
@@ -100,6 +102,7 @@ public class ParallelRowDataSource implements DataSourceV2, ReadSupport {
                         new SplitDataReaderFactory(_host, _port, _table, readSchema(), split);
                 factories.add(factory);
             }
+            log.info("created " + factories.size() + " factories");
             return factories;
         }
     }
@@ -148,6 +151,8 @@ public class ParallelRowDataSource implements DataSourceV2, ReadSupport {
      * which uses it to create a reader for its own use.
      */
     static class SplitDataReaderFactory implements DataReaderFactory<Row> {
+
+        static Logger log = Logger.getLogger(SplitDataReaderFactory.class.getName());
 
         public SplitDataReaderFactory(String host, int port,
                                        String table, StructType schema,

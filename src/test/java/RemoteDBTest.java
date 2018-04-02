@@ -310,6 +310,9 @@ public class RemoteDBTest {
 
         SampleTables.makeSimple(_client, "table1", 20);
 
+        String clusteredIndexColumn = _client.getTableClusteredIndexColumn("table1");
+        assertThat(clusteredIndexColumn).isNull();
+
         List<Split> splits = _client.getSplits("table1", 6);
 
         assertThat(splits).isNotNull();
@@ -345,6 +348,10 @@ public class RemoteDBTest {
             throws Exception {
 
         SampleTables.makeClustered(_client, "table1", 16, 8);
+
+        String clusteredIndexColumn = _client.getTableClusteredIndexColumn("table1");
+        assertThat(clusteredIndexColumn).isNotNull();
+        assertThat(clusteredIndexColumn).isEqualTo("c");
 
         List<Split> splits = _client.getSplits("table1", 4);
 

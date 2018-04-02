@@ -33,9 +33,7 @@ public class ReadParallel {
 
         //
         // Since this DataSource doesn't support writing, we need to populate
-        // ExampleDB with some data. Also, since the DataSource only uses a
-        // fixed schema and reads from a single, fixed table, we need to make
-        // sure that the data we create conforms to those.
+        // ExampleDB with some data.
         //
 
         Schema schema = new Schema();
@@ -71,7 +69,8 @@ public class ReadParallel {
         //
         // This is where we read from our DataSource. Notice how we use the
         // fully qualified class name and provide the information needed to connect to
-        // ExampleDB using options.
+        // ExampleDB using options. This time we'll ExampleDB's default number of table
+        // partitions, 4, so we don't need to specify it.
         //
         Dataset<Row> data = spark.read()
                 .format(dataSourceName)
@@ -94,7 +93,7 @@ public class ReadParallel {
 
 
         //
-        // We can specify a different number of partitions too
+        // We can specify a different number of partitions too, overriding ExampleDB's default.
         //
         data = spark.read()
                 .format(dataSourceName)

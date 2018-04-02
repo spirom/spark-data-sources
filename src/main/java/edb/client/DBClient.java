@@ -126,6 +126,30 @@ public class DBClient implements IExampleDB {
         }
     }
 
+    public String getTableClusteredIndexColumn(String tableName) throws UnknownTableException {
+        GetTableClusteredIndexColumnRequest.Builder builder = GetTableClusteredIndexColumnRequest.newBuilder();
+        builder.setTableName(tableName);
+
+        GetTableClusteredIndexColumnRequest request = builder.build();
+        GetTableClusteredIndexColumnResponse response;
+        try {
+            response = _blockingStub.getTableClusteredIndexColumn(request);
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        if (response.getResult()) {
+            if (response.hasColumnName()) {
+                return response.getColumnName();
+            } else {
+                return null;
+            }
+        } else {
+            throw new UnknownTableException(tableName);
+        }
+    }
+
     public void bulkInsert(String name, List<Row> rows) throws UnknownTableException
     {
         BulkInsertRequest.Builder builder = BulkInsertRequest.newBuilder();

@@ -12,6 +12,8 @@ service ExampleDB {
     rpc BulkInsert (BulkInsertRequest) returns (BulkInsertResponse) {}
     rpc GetAllRows (GetAllRowsRequest) returns (GetAllRowsResponse) {}
     rpc GetSplits (GetSplitsRequest) returns (GetSplitsResponse) {}
+    rpc GetTableClusteredIndexColumn (GetTableClusteredIndexColumnRequest)
+        returns (GetTableClusteredIndexColumnResponse) {}
 }
 
 message PingRequest {
@@ -75,6 +77,15 @@ message GetSplitsRequest {
 message GetSplitsResponse {
     required bool result = 1;
     repeated Split splits = 2;
+}
+
+message GetTableClusteredIndexColumnRequest {
+    optional string tableName = 1;
+}
+
+message GetTableClusteredIndexColumnResponse {
+    required bool result = 1;
+    optional string columnName = 2;
 }
 
 message TableSchema {

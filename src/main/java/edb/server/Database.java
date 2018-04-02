@@ -47,6 +47,20 @@ public class Database implements IExampleDB {
         }
     }
 
+    public String getTableClusteredIndexColumn(String name) throws UnknownTableException {
+        boolean present = _tables.containsKey(name);
+        if (present) {
+            ITable entry = _tables.get(name);
+            if (entry instanceof ClusteredIndexTable) {
+                return ((ClusteredIndexTable) entry).getIndexColumn();
+            } else {
+                return null;
+            }
+        } else {
+            throw new UnknownTableException(name);
+        }
+    }
+
     public void bulkInsert(String name, List<Row> rows) throws UnknownTableException {
         boolean present = _tables.containsKey(name);
         if (present) {

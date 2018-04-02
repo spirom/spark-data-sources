@@ -60,10 +60,18 @@ public class DBClientWrapper {
                     fields.add(DataTypes.createStructField(name,
                             DataTypes.DoubleType, true));
                     break;
+                case STRING:
+                    fields.add(DataTypes.createStructField(name,
+                            DataTypes.StringType, true));
+                    break;
                 default:
             }
         }
         return DataTypes.createStructType(fields);
+    }
+
+    public String getClusteredIndexColumn(String table) throws UnknownTableException {
+        return _client.getTableClusteredIndexColumn(table);
     }
 
     public List<Split> getSplits(String table, int count) throws UnknownTableException {

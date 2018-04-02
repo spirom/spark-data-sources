@@ -27,6 +27,8 @@ class ClusteredIndexTable implements ITable {
 
     public Schema getSchema() { return _schema; }
 
+    public String getIndexColumn() { return _indexColumn; }
+
     public void addRows(List<Row> rows) {
         for (Row row : rows) {
             try {

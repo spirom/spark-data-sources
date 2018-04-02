@@ -126,6 +126,31 @@ public class DBServer {
         }
 
         @Override
+        public void getTableClusteredIndexColumn(
+                GetTableClusteredIndexColumnRequest req,
+                StreamObserver<GetTableClusteredIndexColumnResponse> responseObserver) {
+
+            String tableName = req.getTableName();
+
+            GetTableClusteredIndexColumnResponse.Builder builder =
+                    GetTableClusteredIndexColumnResponse.newBuilder();
+            try {
+                String columnName = _db.getTableClusteredIndexColumn(tableName);
+                if (columnName != null) {
+                    builder.setColumnName(columnName);
+                }
+                builder.setResult(true);
+
+            } catch (UnknownTableException ete) {
+                builder.setResult(false);
+            }
+
+            GetTableClusteredIndexColumnResponse reply = builder.build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
+        @Override
         public void bulkInsert(BulkInsertRequest req,
                                StreamObserver<BulkInsertResponse> responseObserver) {
             String name = req.getName();
