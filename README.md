@@ -156,7 +156,7 @@ specifying a partition count.</p>
 </tr>
 <tr>
 <td><a href="src/main/java/examples/JReadPartitionAware.java">JReadPartitionAware.java</a><br/>
-<a href="src/main/scala/examples/SReadPartitionAware.java">SReadPartitionAware.scala</a></td>
+<a href="src/main/scala/examples/SReadPartitionAware.scala">SReadPartitionAware.scala</a></td>
 <td>
 <p>Uses the PartitioningRowDataSource to avoid a shuffle in a grouping/aggregation query
 against a table that is clustered ont he grouping column. It achieves this by using the
@@ -165,7 +165,7 @@ SupportsReportPartitioning mixin for the DataSourceReader interface.</p>
 </tr>
 <tr>
 <td><a href="src/main/java/examples/JReadPartitionAware_Mismatch.java">JReadPartitionAware_Mismatch.java</a><br/>
-<a href="src/main/scala/examples/SReadPartitionAware_Mismatch.java">SReadPartitionAware_Mismatch.scala</a></td>
+<a href="src/main/scala/examples/SReadPartitionAware_Mismatch.scala">SReadPartitionAware_Mismatch.scala</a></td>
 <td>
 <p>This uses the same data source as the previous example but doesn't cluster the table, thus
 illustrating the shuffle that takes place. .</p>
