@@ -124,7 +124,8 @@ These can be found under [src/main/java/examples](src/main/java/examples).
 <tr><th>File</th><th>What's Illustrated</th></tr>
 
 <tr>
-<td><a href="src/main/java/examples/Basic.java">Basic.java</a></td>
+<td><a href="src/main/java/examples/JBasic.java">JBasic.java</a><br/>
+<a href="src/main/scala/examples/SBasic.java">SBasic.java</a></td>
 <td>
 <p>Simplest example that uses direct ExampleDB calls to populate a table and then
 uses the SimpleRowDataSource to query it from Spark. Since that data source is
@@ -134,14 +135,14 @@ the table name is not specified int he Spark code.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/ReadNamedTable.java">ReadNamedTable.java</a></td>
+<td><a href="src/main/java/examples/JReadNamedTable.java">JReadNamedTable.java</a></td>
 <td>
 <p>Instead uses the FlexibleRowDataSource to infer the schema of a specified table
 and query it, again sequentially, again resulting in a Dataset with a single partition.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/ReadParallel.java">ReadParallel.java</a></td>
+<td><a href="src/main/java/examples/JReadParallel.java">JReadParallel.java</a></td>
 <td>
 <p>Uses the ParallelRowDataSource to infer the schema of a specified table
 and query it, this time in parallel, resulting in Datasets with multiple partitions.
@@ -150,7 +151,7 @@ specifying a partition count.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/ReadPartitionAware.java">ReadPartitionAware.java</a></td>
+<td><a href="src/main/java/examples/JReadPartitionAware.java">ReadPartitionAware.java</a></td>
 <td>
 <p>Uses the PartitioningRowDataSource to avoid a shuffle in a grouping/aggregation query
 against a table that is clustered ont he grouping column. It achieves this by using the
@@ -158,10 +159,27 @@ SupportsReportPartitioning mixin for the DataSourceReader interface.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/ReadPartitionAware_Mismatch.java">ReadPartitionAware_Mismatch.java</a></td>
+<td><a href="src/main/java/examples/JReadPartitionAware_Mismatch.java">ReadPartitionAware_Mismatch.java</a></td>
 <td>
 <p>This uses the same data source as the previous example but doesn't cluster the table, thus
 illustrating the shuffle that takes place. .</p>
+</td>
+</tr>
+<tr>
+<td><a href="src/main/java/examples/JReadWriteParallel.java">JReadWriteParallel.java</a><br>
+<a href="src/main/scala/examples/SReadWriteParallel.java">SReadWriteParallel.java</a>
+</td>
+<td>
+<p>This illustrates updates using the simplest update-capable data source example, the ParallelRowReadWriteDataSource.</p>
+<p>First a dataframe is created that is used to populate a table for the first time. At that
+point the newly created table's database schema is calculated from the dataframe schema.
+Notice that even though we create a dataframe with 6 partitions, later when we read
+from the table we always obtain dataframes with 4 partitions. This is because all tables
+in ExampleDB advertise 4 partitions by default, and we would have to override that default
+when reading to obtain different partitioning. However, the partitioning of the dataframe
+DOES impact update parallelism -- notice from the log output that six tasks write to six temporary tables --
+and these would have run in parallel had we not specified only 4 executors as we do in all these examples.</p>
+<p>We then put all four settings of SaveMode through their paces and see their impact.</p>
 </td>
 </tr>
 </table>

@@ -48,7 +48,7 @@ class ClusteredIndexTable implements ITable {
 
     public List<Row> getRows() {
         List<Row> rows = new ArrayList<>();
-        for (List<Row> someRows : _rows.values()) {
+        for (List<Row> someRows : _orderedClusters) {
             rows.addAll(someRows);
         }
         return rows;
@@ -107,6 +107,13 @@ class ClusteredIndexTable implements ITable {
             }
         }
         return splits;
+    }
+
+    public boolean isTemporary() { return false; }
+
+    public void truncate() {
+        _orderedClusters.clear();
+        _rows.clear();
     }
 
     private String _name;

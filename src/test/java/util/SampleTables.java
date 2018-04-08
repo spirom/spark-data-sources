@@ -48,4 +48,36 @@ public class SampleTables {
 
         db.bulkInsert(tableName, toInsert);
     }
+
+    public static void makeEmpty(IExampleDB db, String persistentName) throws ExistingTableException {
+        Schema schema = new Schema();
+        schema.addColumn("a", Schema.ColumnType.INT64);
+        schema.addColumn("b", Schema.ColumnType.DOUBLE);
+        schema.addColumn("c", Schema.ColumnType.STRING);
+
+        db.createTable(persistentName, schema);
+    }
+
+    public static String makeEmpty(IExampleDB db) {
+
+        Schema schema = new Schema();
+        schema.addColumn("a", Schema.ColumnType.INT64);
+        schema.addColumn("b", Schema.ColumnType.DOUBLE);
+        schema.addColumn("c", Schema.ColumnType.STRING);
+
+        return db.createTemporaryTable(schema);
+    }
+
+    public static void fill(IExampleDB db, String tableName, int rowCount) throws UnknownTableException {
+        List<Row> toInsert = new ArrayList<>();
+        for (int i = 0; i < rowCount; i++) {
+            Row r = new Row();
+            r.addField(new Row.Int64Field("a", i));
+            r.addField(new Row.DoubleField("b", i + 0.5));
+            r.addField(new Row.StringField("c", "S_" + i));
+            toInsert.add(r);
+        }
+
+        db.bulkInsert(tableName, toInsert);
+    }
 }

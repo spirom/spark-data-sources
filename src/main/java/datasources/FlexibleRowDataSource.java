@@ -40,7 +40,7 @@ public class FlexibleRowDataSource implements DataSourceV2, ReadSupport {
     }
 
     /**
-     * This is how Spark discovers the source's schema by requesting a schema from ExmapleDB,
+     * This is how Spark discovers the source table's schema by requesting a schema from ExmapleDB,
      * and how it obtains the reader factories to be used by the executors to create readers.
      * In this case only one reader factory is created, supporting just one executor, so the
      * resulting Dataset will have only a single partition -- that's why this DataSource
@@ -67,7 +67,7 @@ public class FlexibleRowDataSource implements DataSourceV2, ReadSupport {
                 DBClientWrapper db = new DBClientWrapper(_host, _port);
                 db.connect();
                 try {
-                    _schema = db.getSchema(_table);
+                    _schema = db.getSparkSchema(_table);
                 } catch (UnknownTableException ute) {
                     throw new RuntimeException(ute);
                 } finally {

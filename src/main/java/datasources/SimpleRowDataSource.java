@@ -41,7 +41,7 @@ public class SimpleRowDataSource implements DataSourceV2, ReadSupport {
     }
 
     /**
-     * This is how Spark discovers the source's schema (fixed in this case) and how it
+     * This is how Spark discovers the source table's schema (fixed in this case) and how it
      * obtains the reader factories to be used by the executors to create readers. In this
      * case only one reader factory is created, supporting just one executor, so the
      * resulting Dataset will have only a single partition -- that's why this DataSource

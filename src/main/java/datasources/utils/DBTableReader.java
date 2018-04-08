@@ -1,10 +1,14 @@
 package datasources.utils;
 
 import edb.client.DBClient;
+import edb.common.Schema;
 import edb.common.Split;
 import edb.common.UnknownTableException;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.expressions.GenericRow;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import java.util.List;
 
@@ -37,48 +41,10 @@ public class DBTableReader {
     }
 
     public Row get() {
-        return convert(_rows.get(_start), _columnNames);
+        return DBClientWrapper.dbToSparkRow(_rows.get(_start), _columnNames);
     }
 
-    private Row convert(edb.common.Row dbRow) {
-        int fieldCount = dbRow.getFieldCount();
-        Object[] values = new Object[fieldCount];
-        for (int i = 0; i < fieldCount; i++) {
-            edb.common.Row.Field f = dbRow.getField(i);
-            if (f instanceof edb.common.Row.Int64Field) {
-                edb.common.Row.Int64Field i64f = (edb.common.Row.Int64Field) f;
-                values[i] = i64f.getValue();
-            } else if (f instanceof edb.common.Row.DoubleField) {
-                edb.common.Row.DoubleField df = (edb.common.Row.DoubleField) f;
-                values[i] = df.getValue();
-            } else if (f instanceof edb.common.Row.StringField) {
-                edb.common.Row.StringField df = (edb.common.Row.StringField) f;
-                values[i] = df.getValue();
-            }
-        }
-        GenericRow row = new GenericRow(values);
-        return row;
-    }
 
-    private Row convert(edb.common.Row dbRow, String[] colNames) {
-        int fieldCount = dbRow.getFieldCount();
-        Object[] values = new Object[fieldCount];
-        for (int i = 0; i < colNames.length; i++) {
-            edb.common.Row.Field f = dbRow.getField(colNames[i]);
-            if (f instanceof edb.common.Row.Int64Field) {
-                edb.common.Row.Int64Field i64f = (edb.common.Row.Int64Field) f;
-                values[i] = i64f.getValue();
-            } else if (f instanceof edb.common.Row.DoubleField) {
-                edb.common.Row.DoubleField df = (edb.common.Row.DoubleField) f;
-                values[i] = df.getValue();
-            } else if (f instanceof edb.common.Row.StringField) {
-                edb.common.Row.StringField df = (edb.common.Row.StringField) f;
-                values[i] = df.getValue();
-            }
-        }
-        GenericRow row = new GenericRow(values);
-        return row;
-    }
 
     private String _table;
 

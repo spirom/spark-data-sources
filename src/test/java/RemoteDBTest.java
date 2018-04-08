@@ -9,6 +9,7 @@ import util.SampleTables;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -408,4 +409,72 @@ public class RemoteDBTest {
         assertThat(returned.get(3).getField("a").getInt64Value()).isEqualTo(15);
 
     }
+
+    @Test
+    public void testCreateInsertScanProject()
+            throws Exception {
+
+        SampleTables.makeClustered(_client, "table1", 16, 8);
+
+        List<Row> returned = _client.getAllRows("table1", Arrays.asList("c", "a"));
+
+        assertThat(returned).isNotNull();
+
+        assertThat(returned.size()).isEqualTo(16);
+
+        assertThat(returned.get(0).getField(0).getName()).isEqualTo("c");
+        assertThat(returned.get(0).getField(1).getName()).isEqualTo("a");
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(0);
+
+        List<Split> splits = _client.getSplits("table1", 4);
+
+        assertThat(splits).isNotNull();
+
+        assertThat(splits.size()).isEqualTo(4);
+
+        returned = _client.getAllRows("table1", splits.get(1), Arrays.asList("c", "a"));
+
+        assertThat(returned).isNotNull();
+
+        assertThat(returned.size()).isEqualTo(4);
+
+        assertThat(returned.get(0).getField(0).getName()).isEqualTo("c");
+        assertThat(returned.get(0).getField(1).getName()).isEqualTo("a");
+        assertThat(returned.get(0).getField("a").getInt64Value()).isEqualTo(2);
+    }
+
+    @Test
+    public void testTemporaryTableBulkInsert() throws Exception {
+        String tmp1 = SampleTables.makeEmpty(_client);
+        String tmp2 = SampleTables.makeEmpty(_client);
+        SampleTables.makeEmpty(_client, "persistentTable");
+
+        SampleTables.fill(_client, tmp1, 10);
+        SampleTables.fill(_client, tmp2, 30);
+
+        _client.bulkInsertFromTables("persistentTable", false, Arrays.asList(tmp1, tmp2));
+
+        List<Row> returned = _client.getAllRows("persistentTable");
+
+        assertThat(returned).isNotNull();
+
+        assertThat(returned.size()).isEqualTo(40);
+
+        long sum = 0;
+        for (int i = 0; i < 40; i++) {
+            sum += returned.get(i).getField("a").getInt64Value();
+        }
+        assertThat(sum).isEqualTo(480);
+
+        assertThatThrownBy(() -> {
+            _client.getAllRows(tmp1);
+        }).isInstanceOf(UnknownTableException.class);
+
+        assertThatThrownBy(() -> {
+            _client.getAllRows(tmp2);
+        }).isInstanceOf(UnknownTableException.class);
+
+    }
 }
+
+

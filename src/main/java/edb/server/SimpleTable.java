@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SimpleTable implements ITable {
-    public SimpleTable(String name, Schema schema) {
+    public SimpleTable(String name, Schema schema, boolean isTemporary) {
         _name = name;
         _schema = schema;
+        _isTemporary = isTemporary;
     }
 
     public String getName() { return _name; }
@@ -71,10 +72,18 @@ class SimpleTable implements ITable {
         return splits;
     }
 
+    public boolean isTemporary() { return _isTemporary; }
+
+    public void truncate() {
+        _rows.clear();
+    }
+
     private String _name;
 
     private Schema _schema;
 
     private List<Row> _rows = new ArrayList<>();
+
+    private boolean _isTemporary;
 
 }

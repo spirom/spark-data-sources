@@ -102,6 +102,22 @@ public class DBServer {
         }
 
         @Override
+        public void createTemporaryTable(CreateTemporaryTableRequest req,
+                                StreamObserver<CreateTemporaryTableResponse> responseObserver) {
+
+            TableSchema schema = req.getSchema();
+
+            CreateTemporaryTableResponse.Builder builder = CreateTemporaryTableResponse.newBuilder();
+
+            String tempName = _db.createTemporaryTable(new Schema(schema));
+            builder.setName(tempName);
+
+            CreateTemporaryTableResponse reply = builder.build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
+        @Override
         public void getTableSchema(GetTableSchemaRequest req,
                                    StreamObserver<GetTableSchemaResponse> responseObserver) {
 
@@ -174,6 +190,25 @@ public class DBServer {
         }
 
         @Override
+        public void bulkInsertFromTables(BulkInsertFromTablesRequest req,
+                               StreamObserver<BulkInsertFromTablesResponse> responseObserver) {
+            String destination = req.getDestination();
+            boolean truncateDestination = req.getTruncateDestination();
+            List<String> sources = req.getSourceList();
+
+            BulkInsertFromTablesResponse.Builder builder = BulkInsertFromTablesResponse.newBuilder();
+            try {
+                _db.bulkInsertFromTables(destination, truncateDestination, sources);
+            } catch (UnknownTableException ete) {
+                builder.setUnknown(ete.getTableName());
+            }
+
+            BulkInsertFromTablesResponse reply = builder.build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
+        @Override
         public void getAllRows(GetAllRowsRequest req,
                                StreamObserver<GetAllRowsResponse> responseObserver) {
             String name = req.getName();
@@ -181,11 +216,18 @@ public class DBServer {
             GetAllRowsResponse.Builder builder = GetAllRowsResponse.newBuilder();
             try {
                 List<Row> rows = null;
-                if (req.hasSplit()) {
+                if (req.hasSplit() && req.getColumnsCount() > 0) {
+                    Split rpcSplit = req.getSplit();
+                    edb.common.Split split =
+                            edb.common.Split.deserialize(rpcSplit.getOpaque().toByteArray());
+                    rows = _db.getAllRows(name, split, req.getColumnsList());
+                } else if (req.hasSplit()) {
                     Split rpcSplit = req.getSplit();
                     edb.common.Split split =
                             edb.common.Split.deserialize(rpcSplit.getOpaque().toByteArray());
                     rows = _db.getAllRows(name, split);
+                } else if (req.getColumnsCount() > 0) {
+                    rows = _db.getAllRows(name, req.getColumnsList());
                 } else {
                     rows = _db.getAllRows(name);
                 }

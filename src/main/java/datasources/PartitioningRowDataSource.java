@@ -59,7 +59,7 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
     }
 
     /**
-     * This is how Spark discovers the source's schema by requesting a schema from ExmapleDB,
+     * This is how Spark discovers the source table's schema by requesting it from ExmapleDB,
      * and how it obtains the reader factories to be used by the executors to create readers.
      * Notice that one factory is created for each partition.
      */
@@ -95,7 +95,7 @@ public class PartitioningRowDataSource implements DataSourceV2, ReadSupport {
                 DBClientWrapper db = new DBClientWrapper(_host, _port);
                 db.connect();
                 try {
-                    _schema = db.getSchema(_table);
+                    _schema = db.getSparkSchema(_table);
                     _clusteredColumn = db.getClusteredIndexColumn(_table);
                     if (_requestedPartitions == 0)
                         _splits = db.getSplits(_table);

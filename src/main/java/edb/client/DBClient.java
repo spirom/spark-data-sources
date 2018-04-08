@@ -105,6 +105,24 @@ public class DBClient implements IExampleDB {
         }
     }
 
+    public synchronized String createTemporaryTable(Schema schema) {
+        CreateTemporaryTableRequest.Builder builder = CreateTemporaryTableRequest.newBuilder();
+        TableSchema.Builder schemaBuilder = TableSchema.newBuilder();
+        schema.build(schemaBuilder);
+        builder.setSchema(schemaBuilder.build());
+
+        CreateTemporaryTableRequest request = builder.build();
+        CreateTemporaryTableResponse response;
+        try {
+            response = _blockingStub.createTemporaryTable(request);
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        return response.getName();
+    }
+
     public Schema getTableSchema(String name) throws UnknownTableException {
         GetTableSchemaRequest.Builder builder = GetTableSchemaRequest.newBuilder();
         builder.setName(name);
@@ -177,11 +195,42 @@ public class DBClient implements IExampleDB {
         }
     }
 
+    public synchronized void bulkInsertFromTables(String destination, boolean truncateDestination,
+                                                  List<String> sourceTables)
+            throws UnknownTableException
+    {
+        BulkInsertFromTablesRequest.Builder builder = BulkInsertFromTablesRequest.newBuilder();
+        builder.setDestination(destination);
+        builder.setTruncateDestination(truncateDestination);
+        builder.addAllSource(sourceTables);
+
+        BulkInsertFromTablesRequest request = builder.build();
+        BulkInsertFromTablesResponse response;
+        try {
+            response = _blockingStub.bulkInsertFromTables(request);
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        if (response.hasUnknown()) {
+            throw new UnknownTableException(response.getUnknown());
+        }
+    }
+
     public List<Row> getAllRows(String name) throws UnknownTableException {
-        return getAllRows(name, null);
+        return getAllRows(name, null, null);
+    }
+
+    public List<Row> getAllRows(String name, List<String> columns) throws UnknownTableException {
+        return getAllRows(name, null, columns);
     }
 
     public List<Row> getAllRows(String name, Split split) throws UnknownTableException {
+        return getAllRows(name, split, null);
+    }
+
+    public List<Row> getAllRows(String name, Split split, List<String> columns) throws UnknownTableException {
         GetAllRowsRequest.Builder builder = GetAllRowsRequest.newBuilder();
         builder.setName(name);
 
@@ -189,6 +238,10 @@ public class DBClient implements IExampleDB {
             edb.rpc.Split.Builder splitBuilder = edb.rpc.Split.newBuilder();
             splitBuilder.setOpaque(ByteString.copyFrom(split.serialize()));
             builder.setSplit(splitBuilder.build());
+        }
+
+        if (columns != null) {
+            builder.addAllColumns(columns);
         }
 
         GetAllRowsRequest request = builder.build();

@@ -4,10 +4,11 @@ package edb.common;
 import edb.rpc.ColumnSchema;
 import edb.rpc.TableSchema;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
 
-public class Schema {
+public class Schema  implements Serializable {
 
     public enum ColumnType {
         INT64,
@@ -15,7 +16,7 @@ public class Schema {
         STRING
     }
 
-    public static class SchemaEntry {
+    public static class SchemaEntry implements Serializable {
         public SchemaEntry(String name, ColumnType type) {
             _name = name;
             _type = type;
@@ -31,6 +32,15 @@ public class Schema {
 
     public Schema() {
 
+    }
+
+    public boolean isCompatible(Schema other) {
+        if (_orderedColumns.size() != other._orderedColumns.size()) return false;
+        for (int i = 0; i < _orderedColumns.size(); i++) {
+            if (!_orderedColumns.get(i)._name.equals(other._orderedColumns.get(i)._name)) return false;
+            if (_orderedColumns.get(i)._type != other._orderedColumns.get(i)._type) return false;
+        }
+        return true;
     }
 
     public Schema(TableSchema rpcSchema) {

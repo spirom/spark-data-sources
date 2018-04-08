@@ -6,6 +6,7 @@ import edb.common.Schema;
 import edb.common.UnknownTableException;
 import edb.server.DBServer;
 import examples.utils.RDDUtils;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -18,7 +19,7 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.sum;
 
 
-public class ReadPartitionAware_Mismatch {
+public class JReadPartitionAware {
     public static void main(String[] args)
             throws IOException, InterruptedException,
             ExistingTableException, UnknownTableException
@@ -44,9 +45,9 @@ public class ReadPartitionAware_Mismatch {
 
         DBClient client = new DBClient(serverHost, serverPort);
         //
-        // THis time the table is not clustered on any column
+        // Specify that the table is partitioned on column G
         //
-        client.createTable("myTable", schema);
+        client.createTable("myTable", schema, "g");
 
         List<edb.common.Row> toInsert = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
@@ -71,7 +72,7 @@ public class ReadPartitionAware_Mismatch {
 
         SparkSession spark = SparkSession
                 .builder()
-                .appName("ReadPartitionAware-Mismatch")
+                .appName("JReadPartitionAware")
                 .master("local[4]")
                 .getOrCreate();
 
@@ -79,8 +80,7 @@ public class ReadPartitionAware_Mismatch {
         // This is where we read from our DataSource. Notice how we use the
         // fully qualified class name and provide the information needed to connect to
         // ExampleDB using options. We specify two partitions so that each can be expected
-        // to contain two clusters. But the table wasn't set up with the column clustered, so
-        // a shuffle will be needed.
+        // to contain two clusters.
         //
         Dataset<Row> data = spark.read()
                 .format(dataSourceName)
@@ -100,10 +100,6 @@ public class ReadPartitionAware_Mismatch {
 
         Dataset<Row> aggregated = data.groupBy(col("g")).agg(sum(col("u")));
 
-        //
-        // Note: since a shuffle was required, the resulting table has the usual default
-        // number of partitions -- 200 as of Spark 2.3.0
-        //
         System.out.println("*** Query result: ");
         aggregated.show();
 

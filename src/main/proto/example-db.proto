@@ -8,8 +8,10 @@ service ExampleDB {
     rpc Ping (PingRequest) returns (PingResponse) {}
     rpc ListTables (ListTablesRequest) returns (ListTablesResponse) {}
     rpc CreateTable (CreateTableRequest) returns (CreateTableResponse) {}
+    rpc CreateTemporaryTable (CreateTemporaryTableRequest) returns (CreateTemporaryTableResponse) {}
     rpc GetTableSchema (GetTableSchemaRequest) returns (GetTableSchemaResponse) {}
     rpc BulkInsert (BulkInsertRequest) returns (BulkInsertResponse) {}
+    rpc BulkInsertFromTables (BulkInsertFromTablesRequest) returns (BulkInsertFromTablesResponse) {}
     rpc GetAllRows (GetAllRowsRequest) returns (GetAllRowsResponse) {}
     rpc GetSplits (GetSplitsRequest) returns (GetSplitsResponse) {}
     rpc GetTableClusteredIndexColumn (GetTableClusteredIndexColumnRequest)
@@ -41,6 +43,14 @@ message CreateTableResponse {
     required bool result = 1;
 }
 
+message CreateTemporaryTableRequest {
+    required TableSchema schema = 1;
+}
+
+message CreateTemporaryTableResponse {
+    required string name = 1;
+}
+
 message GetTableSchemaRequest {
     required string name = 1;
 }
@@ -59,9 +69,20 @@ message BulkInsertResponse {
     required bool result = 1;
 }
 
+message BulkInsertFromTablesRequest {
+    required string destination = 1;
+    repeated string source = 2;
+    required bool truncateDestination = 3;
+}
+
+message BulkInsertFromTablesResponse {
+    optional string unknown = 1;
+}
+
 message GetAllRowsRequest {
     required string name = 1;
     optional Split split = 2;
+    repeated string columns = 3;
 }
 
 message GetAllRowsResponse {

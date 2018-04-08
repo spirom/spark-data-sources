@@ -24,4 +24,8 @@ public interface ITable {
     List<Split> makeSplits();
 
     List<Split> makeSplits(int countDesired);
+
+    boolean isTemporary();
+
+    void truncate();
 }
