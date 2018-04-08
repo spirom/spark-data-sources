@@ -137,14 +137,16 @@ the table name is not specified int he Spark code.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/JReadNamedTable.java">JReadNamedTable.java</a></td>
+<td><a href="src/main/java/examples/JReadNamedTable.java">JReadNamedTable.java</a><br/>
+<a href="src/main/scala/examples/SReadNamedTable.scala">SReadNamedTable.scala</a></td>
 <td>
 <p>Instead uses the FlexibleRowDataSource to infer the schema of a specified table
 and query it, again sequentially, again resulting in a Dataset with a single partition.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/JReadParallel.java">JReadParallel.java</a></td>
+<td><a href="src/main/java/examples/JReadParallel.java">JReadParallel.java</a><br/>
+<a href="src/main/scala/examples/SReadParallel.scala">SReadParallel.scala</a></td>
 <td>
 <p>Uses the ParallelRowDataSource to infer the schema of a specified table
 and query it, this time in parallel, resulting in Datasets with multiple partitions.
@@ -153,7 +155,8 @@ specifying a partition count.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/JReadPartitionAware.java">ReadPartitionAware.java</a></td>
+<td><a href="src/main/java/examples/JReadPartitionAware.java">JReadPartitionAware.java</a><br/>
+<a href="src/main/scala/examples/SReadPartitionAware.java">SReadPartitionAware.scala</a></td>
 <td>
 <p>Uses the PartitioningRowDataSource to avoid a shuffle in a grouping/aggregation query
 against a table that is clustered ont he grouping column. It achieves this by using the
@@ -161,7 +164,8 @@ SupportsReportPartitioning mixin for the DataSourceReader interface.</p>
 </td>
 </tr>
 <tr>
-<td><a href="src/main/java/examples/JReadPartitionAware_Mismatch.java">ReadPartitionAware_Mismatch.java</a></td>
+<td><a href="src/main/java/examples/JReadPartitionAware_Mismatch.java">JReadPartitionAware_Mismatch.java</a><br/>
+<a href="src/main/scala/examples/SReadPartitionAware_Mismatch.java">SReadPartitionAware_Mismatch.scala</a></td>
 <td>
 <p>This uses the same data source as the previous example but doesn't cluster the table, thus
 illustrating the shuffle that takes place. .</p>

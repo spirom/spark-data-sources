@@ -31,7 +31,7 @@ object SReadWriteParallel {
 
     val spark =
       SparkSession.builder()
-        .appName("ReadWriteParallel")
+        .appName("SReadWriteParallel")
         .master("local[4]")
         .getOrCreate()
 

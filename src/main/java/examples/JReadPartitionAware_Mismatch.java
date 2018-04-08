@@ -44,7 +44,7 @@ public class JReadPartitionAware_Mismatch {
 
         DBClient client = new DBClient(serverHost, serverPort);
         //
-        // THis time the table is not clustered on any column
+        // This time the table is not clustered on any column
         //
         client.createTable("myTable", schema);
 

@@ -5,6 +5,7 @@ import java.io.IOException
 import edb.client.DBClient
 import edb.common.{ExistingTableException, Row, Schema, UnknownTableException}
 import edb.server.DBServer
+
 import org.apache.spark.sql.SparkSession
 
 object SBasic {
@@ -44,7 +45,7 @@ object SBasic {
     val dataSourceName: String = "datasources.SimpleRowDataSource"
 
     val spark: SparkSession =
-      SparkSession.builder().appName("JBasic").master("local[4]").getOrCreate()
+      SparkSession.builder().appName("SBasic").master("local[4]").getOrCreate()
     val data =
       spark.read
         .format(dataSourceName)
