@@ -118,14 +118,16 @@ in practice a shuffle can be avoided if the table is clustered on one of the gro
 
 # The Spark Examples
 
-These can be found under [src/main/java/examples](src/main/java/examples).
+These can be found under [src/main/java/examples](src/main/java/examples) and [src/main/scala/examples](src/main/scala/examples).
+
+## Read-only data sources
 
 <table>
 <tr><th>File</th><th>What's Illustrated</th></tr>
 
 <tr>
 <td><a href="src/main/java/examples/JBasic.java">JBasic.java</a><br/>
-<a href="src/main/scala/examples/SBasic.java">SBasic.java</a></td>
+<a href="src/main/scala/examples/SBasic.scala">SBasic.scala</a></td>
 <td>
 <p>Simplest example that uses direct ExampleDB calls to populate a table and then
 uses the SimpleRowDataSource to query it from Spark. Since that data source is
@@ -165,9 +167,15 @@ SupportsReportPartitioning mixin for the DataSourceReader interface.</p>
 illustrating the shuffle that takes place. .</p>
 </td>
 </tr>
+</table>
+
+## Read/write data sources
+
+<table>
+<tr><th>File</th><th>What's Illustrated</th></tr>
 <tr>
 <td><a href="src/main/java/examples/JReadWriteParallel.java">JReadWriteParallel.java</a><br>
-<a href="src/main/scala/examples/SReadWriteParallel.java">SReadWriteParallel.java</a>
+<a href="src/main/scala/examples/SReadWriteParallel.scala">SReadWriteParallel.scala</a>
 </td>
 <td>
 <p>This illustrates updates using the simplest update-capable data source example, the ParallelRowReadWriteDataSource.</p>
@@ -183,6 +191,7 @@ and these would have run in parallel had we not specified only 4 executors as we
 </td>
 </tr>
 </table>
+
 
 # Logging
 
