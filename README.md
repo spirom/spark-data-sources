@@ -1,5 +1,5 @@
 
-# Spark External Data Sources using the V2 API
+# Developing Spark External Data Sources using the V2 API
 
 This project illustrates the new V2 Apache Spark External Data Source API as
 introduced in Spark 2.3.0.
@@ -70,9 +70,10 @@ ExampleDB only has to serve these examples, it is implemented with expediency as
 
 These can be found under [src/main/java/datasources](src/main/java/datasources).
 
+## Read-only data sources
+
 <table>
 <tr><th>File</th><th>What's Illustrated</th></tr>
-
 <tr>
 <td><a href="src/main/java/datasources/SimpleRowDataSource.java">SimpleRowDataSource.java</a></td>
 <td>
@@ -112,6 +113,22 @@ single partition. Since ExampleDB only supports clustered indexes on single colu
 in practice a shuffle can be avoided if the table is clustered on one of the grouping
 (In ExampleDB clustered tables, splits always respect clustering.)
 </p>
+</td>
+</tr>
+</table>
+
+## Read/write data sources
+
+<table>
+<tr><th>File</th><th>What's Illustrated</th></tr>
+<tr>
+<td><a href="src/main/java/datasources/ParallelRowReadWriteDataSource.java">ParallelRowReadWriteDataSource.java</a></td>
+<td>
+<p>This data source adds the ability to write data, and does so in parallel.
+The various classes for reading are identical to those of ParallelRowDataSource. All four values of
+SaveMode are supported. Each task writes to its own temporary table, and on global commit
+all of these temporary tables are copied into the destination table in a single
+ExampleDB transaction.</p>
 </td>
 </tr>
 </table>

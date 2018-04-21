@@ -29,7 +29,7 @@ import java.util.Optional;
 
 /**
  * This data source adds the ability to write data, and does so in parallel.
- * The various classes for writing are identical to those of ParallelRowDataSource. All four values of
+ * The various classes for reading are identical to those of ParallelRowDataSource. All four values of
  * SaveMode are supported. Each task writes to its own temporary table, and on global commit
  * all of these temporary tables are copied into the destination table in a single
  * ExampleDB transaction.
